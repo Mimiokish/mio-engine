@@ -1,7 +1,7 @@
 import * as MiOEngine from "./mio-engine.js";
 // console.log(111, MiOEngine);
 
-const renderer = new MiOEngine.Renderer();
+const renderer = new MiOEngine.WebGPURenderer();
 console.log(222, renderer);
 
 // const gltfLoader = new MiOEngine.GLTFLoader();

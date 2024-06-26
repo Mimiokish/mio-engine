@@ -1,22 +1,32 @@
-import { WebGPURenderPassParameters, WebGPURenderPipelineParameters, WebGPU, WebGPUAdapter, WebGPUContext, WebGPUDevice } from "../declaration";
+import { WebGPURenderPipelineParameters, WebGPU, WebGPUAdapter, WebGPUContext, WebGPUDevice, WebGPUFormat } from "../declaration";
+import { RendererPass } from "../renderer";
 
-export class WebGPURenderPass {
+export class WebGPURenderPass extends RendererPass {
     #webGpu: WebGPU;
     #webGpuAdapter: WebGPUAdapter;
     #webGpuDevice: WebGPUDevice;
     #webGpuContext: WebGPUContext;
+    #webGpuFormat: WebGPUFormat;
 
-    constructor(params: WebGPURenderPassParameters) {
-        this.#initialParams(params).then((res: boolean): void => {
+    constructor() {
+        super({
+            contextType: "WebGPU"
+        });
+
+        this.#initialParams().then((res: boolean): void => {
             if (res) {
                 console.log("MiO-Engine | engine is ready to go, enjoy coding~");
+
+                const size = 4 * 4 + 2 * 4 + 2 * 4;
+                const temp = this.#webGpuDevice.createBuffer({
+                    size: size,
+                    usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+                });
             }
         });
     }
 
-    async #initialParams(params: WebGPURenderPassParameters): Promise<boolean> {
-        const _context: GPUCanvasContext = params.context;
-
+    async #initialParams(): Promise<boolean> {
         this.#webGpu = navigator.gpu;
         if (!this.#webGpu) {
             console.error("MiO-Engine | WebGPU is not supported");
@@ -35,7 +45,7 @@ export class WebGPURenderPass {
             return false;
         }
 
-        this.#webGpuContext = _context as WebGPUContext;
+        this.#webGpuContext = this.context as WebGPUContext;
         try {
             this.#webGpuContext.configure({
                 device: this.#webGpuDevice,
@@ -49,7 +59,27 @@ export class WebGPURenderPass {
         return true;
     }
 
-    public generalShaderModule(): void {}
+    public createShaderModule(label: string, code: string): GPUShaderModule | boolean {
+        const _label: string = label;
+        const _code: string = code;
 
-    public generalRenderPipeline(descriptor: WebGPURenderPipelineParameters): void {}
+        if (!_label || _label === "") {
+            console.warn("MiO Engine | engine is creating an empty shader due to a missing parameter: label");
+            return false;
+        }
+
+        if (!_code || _code === "") {
+            console.warn("MiO Engine | engine is creating an empty shader due to a missing parameter: code");
+            return false;
+        }
+
+        const shaderModule: GPUShaderModule = this.#webGpuDevice.createShaderModule({
+            label: _label,
+            code: _code
+        });
+
+        return shaderModule;
+    }
+
+    public createRenderPipeline(descriptor: WebGPURenderPipelineParameters): void {}
 }

@@ -1,11 +1,10 @@
-import { RendererPassParams, RendererPasses, CanvasNode, CanvasContextType, WebGPUContext } from "../declaration";
+import { RendererPassParams, CanvasNode, CanvasContextType, WebGPUContext } from "../declaration";
 import { Canvas } from "../document-object-model";
-import { WebGPURenderPass } from "../webgpu/WebGPURenderPass";
 
 export class RendererPass {
-    #self: RendererPasses;
     #node: CanvasNode;
     #canvas: Canvas;
+    #context: null | WebGPUContext;
 
     public get node(): CanvasNode {
         return this.#node;
@@ -19,6 +18,13 @@ export class RendererPass {
     }
     public set canvas(value: Canvas) {
         throw Error("MiO-Engine | canvas is readonly");
+    }
+
+    public get context(): null | WebGPUContext {
+        return this.#context;
+    }
+    public set context(value: null | WebGPUContext) {
+        throw Error("MiO-Engine | context is readonly");
     }
 
     constructor(params: RendererPassParams) {
@@ -37,18 +43,14 @@ export class RendererPass {
         this.#canvas = new Canvas();
         this.#node.appendChild(this.#canvas.node);
 
-        // set renderPass
+        // set context
         switch (_contextType) {
             case "WebGPU":
             case "webgpu":
-                this.#self = new WebGPURenderPass({
-                    context: this.#canvas.getContext("webgpu") as WebGPUContext
-                });
+                this.#context = this.#canvas.getContext("webgpu") as WebGPUContext;
                 break;
             default:
-                this.#self = new WebGPURenderPass({
-                    context: this.#canvas.getContext("webgpu") as WebGPUContext
-                });
+                this.#context = this.#canvas.getContext("webgpu") as WebGPUContext;
         }
     }
 }

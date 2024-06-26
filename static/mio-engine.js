@@ -1,12 +1,24 @@
 class Renderer {
     #renderPass;
-    constructor() {
-        this.#initialParams();
+    get renderPass() {
+        return this.#renderPass;
     }
-    #initialParams() {
-        this.#renderPass = new RendererPass({
-            contextType: "WebGPU"
-        });
+    set renderPass(value) {
+        throw Error("MiO-Engine | renderPass is readonly");
+    }
+    constructor(params) {
+        this.#initialParams(params);
+    }
+    #initialParams(params) {
+        const _contentType = params.contextType ? params.contextType : "WebGPU";
+        switch (_contentType) {
+            case "WebGPU":
+            case "webgpu":
+                this.#renderPass = new WebGPURenderPass();
+                break;
+            default:
+                this.#renderPass = new WebGPURenderPass();
+        }
     }
 }
 
@@ -124,20 +136,85 @@ class Canvas extends DocumentObjectModel {
     }
 }
 
-class WebGPURenderPass {
+class RendererPass {
+    #node;
+    #canvas;
+    #context;
+    get node() {
+        return this.#node;
+    }
+    set node(value) {
+        throw Error("MiO-Engine | node is readonly");
+    }
+    get canvas() {
+        return this.#canvas;
+    }
+    set canvas(value) {
+        throw Error("MiO-Engine | canvas is readonly");
+    }
+    get context() {
+        return this.#context;
+    }
+    set context(value) {
+        throw Error("MiO-Engine | context is readonly");
+    }
+    constructor(params) {
+        this.#initialParams(params);
+    }
+    #initialParams(params) {
+        const _contextType = params.contextType ? params.contextType : "WebGPU";
+        this.#node = document.getElementById("MiO-Engine");
+        if (!this.#node) {
+            console.error("MiO-Engine | a node with the ID(MiO-Engine) needs to be create before render");
+            return false;
+        }
+        this.#canvas = new Canvas();
+        this.#node.appendChild(this.#canvas.node);
+        // set context
+        switch (_contextType) {
+            case "WebGPU":
+            case "webgpu":
+                this.#context = this.#canvas.getContext("webgpu");
+                break;
+            default:
+                this.#context = this.#canvas.getContext("webgpu");
+        }
+    }
+}
+
+class WebGPURenderer extends Renderer {
+    constructor() {
+        super({
+            contextType: "WebGPU"
+        });
+        this.#initialParams();
+    }
+    #initialParams() {
+    }
+}
+
+class WebGPURenderPass extends RendererPass {
     #webGpu;
     #webGpuAdapter;
     #webGpuDevice;
     #webGpuContext;
-    constructor(params) {
-        this.#initialParams(params).then((res) => {
+    #webGpuFormat;
+    constructor() {
+        super({
+            contextType: "WebGPU"
+        });
+        this.#initialParams().then((res) => {
             if (res) {
                 console.log("MiO-Engine | engine is ready to go, enjoy coding~");
+                const size = 4 * 4 + 2 * 4 + 2 * 4;
+                this.#webGpuDevice.createBuffer({
+                    size: size,
+                    usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+                });
             }
         });
     }
-    async #initialParams(params) {
-        const _context = params.context;
+    async #initialParams() {
         this.#webGpu = navigator.gpu;
         if (!this.#webGpu) {
             console.error("MiO-Engine | WebGPU is not supported");
@@ -153,104 +230,37 @@ class WebGPURenderPass {
             console.error("MiO-Engine | a browser that supports WebGPU is needed");
             return false;
         }
-        this.#webGpuContext = _context;
-        this.#webGpuContext.configure({
-            device: this.#webGpuDevice,
-            format: navigator.gpu.getPreferredCanvasFormat()
-        });
-        // hardcoded test
-        const module = this.#webGpuDevice.createShaderModule({
-            label: "our hardcoded red triangle shaders",
-            code: `
-                    @group(0) @binding(0) var<storage, read_write> data: array<f32>;
- 
-                    @compute @workgroup_size(1) fn computeSomething(@builtin(global_invocation_id) id: vec3u) {
-                        let i = id.x;
-                        data[i] = data[i] * 2.0;
-                    }
-                `,
-        });
-        const pipeline = this.#webGpuDevice.createRenderPipeline({
-            label: "our hardcoded red triangle pipeline",
-            layout: "auto",
-            vertex: {
-                module,
-                entryPoint: "vs"
-            },
-            fragment: {
-                module,
-                entryPoint: "fs",
-                targets: [{ format: navigator.gpu.getPreferredCanvasFormat() }]
-            }
-        });
-        const renderPassDescriptor = {
-            label: "our basic canvas renderPass",
-            colorAttachments: [
-                {
-                    // view: <- to be filled out when we render
-                    view: this.#webGpuContext.getCurrentTexture().createView(),
-                    clearValue: [0.4, 0.4, 0.4, 1],
-                    loadOp: "clear",
-                    storeOp: "store"
-                }
-            ]
-        };
-        renderPassDescriptor.colorAttachments[0].view = this.#webGpuContext.getCurrentTexture().createView();
-        const encoder = this.#webGpuDevice.createCommandEncoder({ label: "our encoder" });
-        const pass = encoder.beginRenderPass(renderPassDescriptor);
-        pass.setPipeline(pipeline);
-        pass.draw(3);
-        pass.end();
-        const commandBuffer = encoder.finish();
-        this.#webGpuDevice.queue.submit([commandBuffer]);
-        return true;
-    }
-    generalShaderModule() { }
-    generalRenderPipeline(descriptor) { }
-}
-
-class RendererPass {
-    #self;
-    #node;
-    #canvas;
-    get node() {
-        return this.#node;
-    }
-    set node(value) {
-        throw Error("MiO-Engine | node is readonly");
-    }
-    get canvas() {
-        return this.#canvas;
-    }
-    set canvas(value) {
-        throw Error("MiO-Engine | canvas is readonly");
-    }
-    constructor(params) {
-        this.#initialParams(params);
-    }
-    #initialParams(params) {
-        const _contextType = params.contextType ? params.contextType : "WebGPU";
-        this.#node = document.getElementById("MiO-Engine");
-        if (!this.#node) {
-            console.error("MiO-Engine | a node with the ID(MiO-Engine) needs to be create before render");
+        this.#webGpuContext = this.context;
+        try {
+            this.#webGpuContext.configure({
+                device: this.#webGpuDevice,
+                format: navigator.gpu.getPreferredCanvasFormat()
+            });
+        }
+        catch (error) {
+            console.error("MiO-Engine | context configure error: " + error);
             return false;
         }
-        this.#canvas = new Canvas();
-        this.#node.appendChild(this.#canvas.node);
-        // set renderPass
-        switch (_contextType) {
-            case "WebGPU":
-            case "webgpu":
-                this.#self = new WebGPURenderPass({
-                    context: this.#canvas.getContext("webgpu")
-                });
-                break;
-            default:
-                this.#self = new WebGPURenderPass({
-                    context: this.#canvas.getContext("webgpu")
-                });
-        }
+        return true;
     }
+    createShaderModule(label, code) {
+        const _label = label;
+        const _code = code;
+        if (!_label || _label === "") {
+            console.warn("MiO Engine | engine is creating an empty shader due to a missing parameter: label");
+            return false;
+        }
+        if (!_code || _code === "") {
+            console.warn("MiO Engine | engine is creating an empty shader due to a missing parameter: code");
+            return false;
+        }
+        const shaderModule = this.#webGpuDevice.createShaderModule({
+            label: _label,
+            code: _code
+        });
+        return shaderModule;
+    }
+    createRenderPipeline(descriptor) { }
 }
 
 class WebGL2Parameters {
@@ -592,5 +602,5 @@ class Object3D extends EventDispatcher {
 
 console.log("MiO-Engine | Enjoy Coding!");
 
-export { GLTFLoader, Object3D, Renderer, WebGL2Renderer };
+export { GLTFLoader, Object3D, Renderer, WebGL2Renderer, WebGPURenderer };
 //# sourceMappingURL=mio-engine.js.map
