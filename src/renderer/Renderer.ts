@@ -1,31 +1,51 @@
-import {RendererParams } from "../declaration";
-import { RendererPass } from "../renderer";
-import { WebGPURenderPass } from "../webgpu";
+import { RendererParams, WebGPUContext } from "../declaration";
+import { Canvas } from "../document-object-model";
 
 export class Renderer {
-    #renderPass: null | RendererPass | WebGPURenderPass;
+    #node: HTMLCanvasElement;
+    #canvas: Canvas;
+    #context: WebGPUContext;
 
-    public get renderPass(): null | RendererPass | WebGPURenderPass {
-        return this.#renderPass;
+    public get context(): WebGPUContext {
+        return this.#context;
     }
-    public set renderPass(value: null | RendererPass | WebGPURenderPass) {
-        throw Error("MiO-Engine | renderPass is readonly");
+    public set context(value: WebGPUContext) {
+        throw Error("MiO-Engine | context is readonly");
     }
 
     constructor(params: RendererParams) {
-        this.#initialParams(params);
+        const _params: RendererParams = params;
+
+        if (!_params || JSON.stringify(_params) == "{}") {
+            console.warn("MiO-Engine | Renderer - params is missing");
+        } else {
+            this.#initialParams(params).then((): void => {
+                console.log("MiO-Engine | Renderer - engine is ready to go, enjoy coding~");
+            });
+        }
     }
 
-    #initialParams(params: RendererParams): void {
+    async #initialParams(params: RendererParams): Promise<boolean> {
         const _contentType: string = params.contextType ? params.contextType : "WebGPU";
+
+        this.#node = document.getElementById("MiO-Engine") as HTMLCanvasElement;
+        if (!this.#node) {
+            console.error("MiO-Engine | Renderer - a node with the ID(MiO-Engine) needs to be create before render");
+            return false;
+        }
+
+        this.#canvas = new Canvas();
+        this.#node.appendChild(this.#canvas.node);
 
         switch (_contentType) {
             case "WebGPU":
             case "webgpu":
-                this.#renderPass = new WebGPURenderPass();
+                this.#context = this.#canvas.getContext("webgpu") as WebGPUContext;
                 break;
             default:
-                this.#renderPass = new WebGPURenderPass();
+                this.#context = this.#canvas.getContext("webgpu") as WebGPUContext;
         }
+
+        return true;
     }
 }

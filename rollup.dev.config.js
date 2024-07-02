@@ -1,6 +1,7 @@
 import plugin_babel from "@rollup/plugin-babel";
 import plugin_typescript from "@rollup/plugin-typescript";
 import plugin_eslint from "@rollup/plugin-eslint";
+import plugin_wgsl from "./loader-wgsl.js";
 import plugin_serve from "rollup-plugin-serve";
 
 export default {
@@ -26,6 +27,7 @@ export default {
             exclude: "node_modules/**",
             babelHelpers: "bundled"
         }),
+        plugin_wgsl(),
         plugin_serve({
             contentBase: "static",
             headers: {

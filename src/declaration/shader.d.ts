@@ -1,4 +1,4 @@
-import { CanvasContext } from "./canvas.type";
+import { CanvasContext } from "./canvas";
 
 export type ShaderParams = {
     key: string

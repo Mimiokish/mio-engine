@@ -1,55 +1,45 @@
-import { WebGPURenderPipelineParameters, WebGPU, WebGPUAdapter, WebGPUContext, WebGPUDevice, WebGPUFormat } from "../declaration";
+import { RendererPassParams, WebGPUDevice, WebGPUFormat, WebGPURenderPipeline, WebGPUShaderModule } from "../declaration";
 import { RendererPass } from "../renderer";
+import triangle from "../shaders/libs/triangle.wgsl";
 
 export class WebGPURenderPass extends RendererPass {
-    #webGpu: WebGPU;
-    #webGpuAdapter: WebGPUAdapter;
     #webGpuDevice: WebGPUDevice;
-    #webGpuContext: WebGPUContext;
     #webGpuFormat: WebGPUFormat;
+    #webGpuPipeline: WebGPURenderPipeline;
 
-    constructor() {
-        super({
-            contextType: "WebGPU"
-        });
-
-        this.#initialParams().then((res: boolean): void => {
-            if (res) {
-                console.log("MiO-Engine | engine is ready to go, enjoy coding~");
-
-                const size = 4 * 4 + 2 * 4 + 2 * 4;
-                const temp = this.#webGpuDevice.createBuffer({
-                    size: size,
-                    usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
-                });
-            }
-        });
+    public get device(): WebGPUDevice {
+        return this.#webGpuDevice;
+    }
+    public set device(value: WebGPUDevice) {
+        throw Error("MiO-Engine | WebGPURenderPass - device is readonly");
     }
 
-    async #initialParams(): Promise<boolean> {
-        this.#webGpu = navigator.gpu;
-        if (!this.#webGpu) {
-            console.error("MiO-Engine | WebGPU is not supported");
-            return false;
-        }
+    constructor(params: RendererPassParams) {
+        super(params);
 
-        this.#webGpuAdapter = await this.#webGpu.requestAdapter() as WebGPUAdapter;
-        if (!this.#webGpuAdapter) {
-            console.error("MiO-Engine | WebGPUAdapter initial failed");
-            return false;
-        }
+        const _params: RendererPassParams = params;
 
-        this.#webGpuDevice = await this.#webGpuAdapter.requestDevice() as WebGPUDevice;
-        if (!this.#webGpuAdapter) {
-            console.error("MiO-Engine | a browser that supports WebGPU is needed");
-            return false;
+        if (!_params || JSON.stringify(_params) == "{}") {
+            console.warn("MiO-Engine | WebGPURenderPass - params is missing");
+        } else {
+            this.#initialParams(params).then((): void => {
+                this.drawTriangle();
+            });
         }
+    }
 
-        this.#webGpuContext = this.context as WebGPUContext;
+    async #initialParams(params: RendererPassParams): Promise<boolean> {
+        const _params: RendererPassParams = params;
+
+        this.#webGpuDevice = _params.device;
+
+        // navigator.gpu.getPreferredCanvasFormat()
+        this.#webGpuFormat = "bgra8unorm";
+
         try {
-            this.#webGpuContext.configure({
+            this.context.configure({
                 device: this.#webGpuDevice,
-                format: navigator.gpu.getPreferredCanvasFormat()
+                format: this.#webGpuFormat
             });
         } catch (error) {
             console.error("MiO-Engine | context configure error: " + error);
@@ -59,27 +49,70 @@ export class WebGPURenderPass extends RendererPass {
         return true;
     }
 
-    public createShaderModule(label: string, code: string): GPUShaderModule | boolean {
+    public createShaderModule(label: string, code: any): WebGPUShaderModule | boolean {
         const _label: string = label;
-        const _code: string = code;
+        const _code: any = code;
 
         if (!_label || _label === "") {
             console.warn("MiO Engine | engine is creating an empty shader due to a missing parameter: label");
             return false;
         }
 
-        if (!_code || _code === "") {
+        if (!_code) {
             console.warn("MiO Engine | engine is creating an empty shader due to a missing parameter: code");
             return false;
         }
 
-        const shaderModule: GPUShaderModule = this.#webGpuDevice.createShaderModule({
+        return this.#webGpuDevice.createShaderModule({
             label: _label,
             code: _code
         });
-
-        return shaderModule;
     }
 
-    public createRenderPipeline(descriptor: WebGPURenderPipelineParameters): void {}
+
+    public drawTriangle(): void {
+        console.log("drawing a triangle");
+        const _pipeline: WebGPURenderPipeline = this.device.createRenderPipeline({
+            layout: "auto",
+            vertex: {
+                module: this.device.createShaderModule({
+                    code: triangle
+                }),
+                entryPoint: "vs_main"
+            },
+            fragment: {
+                module: this.device.createShaderModule({
+                    code: triangle
+                }),
+                entryPoint: "fs_main",
+                targets: [{
+                    format: this.#webGpuFormat
+                }]
+            },
+            primitive: {
+                topology: "triangle-list"
+            }
+        });
+
+        const _commandEncoder = this.device.createCommandEncoder();
+        const _textureView = this.context.getCurrentTexture().createView();
+        const _renderPass = _commandEncoder.beginRenderPass({
+            colorAttachments: [{
+                view: _textureView,
+                clearValue: {
+                    r: 0.5,
+                    g: 0.0,
+                    b: 0.25,
+                    a: 1.0
+                },
+                loadOp: "clear",
+                storeOp: "store"
+            }]
+        });
+        _renderPass.setPipeline(_pipeline);
+        _renderPass.draw(3, 1, 0, 0);
+        _renderPass.end();
+
+        this.device.queue.submit([_commandEncoder.finish()]);
+    }
 }

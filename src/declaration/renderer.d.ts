@@ -1,4 +1,4 @@
-import { CanvasContextType } from "./canvas.type";
+import { CanvasContextType, WebGPUContext, WebGPUDevice } from "../declaration";
 import { WebGPURenderPass } from "../webgpu";
 
 export type RendererParams = {
@@ -6,7 +6,8 @@ export type RendererParams = {
 }
 
 export type RendererPassParams = {
-    contextType: CanvasContextType
+    context: WebGPUContext
+    device: WebGPUDevice
 }
 
 export type RendererPasses =

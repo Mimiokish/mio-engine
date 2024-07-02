@@ -1,4 +1,4 @@
-import { EnumObject } from "./common.type";
+import { EnumObject } from "./common";
 
 export type LoaderStatus =
     | "idle"

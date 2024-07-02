@@ -1,4 +1,4 @@
-import { EnumObject } from "./common.type";
+import { EnumObject } from "./common";
 import { Canvas } from "../document-object-model";
 
 export type WebGLContext =
