@@ -177,7 +177,7 @@ class RendererPass {
     }
 }
 
-var triangle = "struct Fragment {\r\n    @builtin(position) Position : vec4<f32>,\r\n    @location(0) Color : vec4<f32>\r\n};\r\n\r\n@stage(vertex)\r\nfn vs_main(@builtin(vertex_index) v_id: u32) -> Fragment {\r\n    var positions = array<vec2<f32>, 3> (\r\n        vec2<f32>( 0.0, 0.5),\r\n        vec2<f32>( -0.5, -0.5),\r\n        vec2<f32>( 0.5, -0.5),\r\n    );\r\n\r\n    var colors = array<vec3<f32>, 3> (\r\n        vec3<f32>(1.0, 0.0, 0.0),\r\n        vec3<f32>(0.0, 1.0, 0.0),\r\n        vec3<f32>(0.0, 0.0, 1.0),\r\n    );\r\n\r\n    var output : Fragment;\r\n    output.Position = vec4<f32>(positions[v_id], 0.0, 1.0);\r\n    output.Color = vec4<f32>(colors[v_id], 1.0);\r\n\r\n    return output;\r\n};\r\n\r\n@stage(fragment)\r\nfn fs_main(@location(0) Color: vec4<f32>) -> @location(0) vec4<f32> {\r\n    return Color;\r\n}\r\n";
+var triangle = "struct Fragment {\r\n    @builtin(position) Position : vec4<f32>,\r\n    @location(0) Color : vec4<f32>\r\n};\r\n\r\n@vertex\r\nfn vs_main(@builtin(vertex_index) v_id: u32) -> Fragment {\r\n    var positions = array<vec2<f32>, 3> (\r\n        vec2<f32>( 0.0, 0.5),\r\n        vec2<f32>( -0.5, -0.5),\r\n        vec2<f32>( 0.5, -0.5),\r\n    );\r\n\r\n    var colors = array<vec3<f32>, 3> (\r\n        vec3<f32>(1.0, 0.0, 0.0),\r\n        vec3<f32>(0.0, 1.0, 0.0),\r\n        vec3<f32>(0.0, 0.0, 1.0),\r\n    );\r\n\r\n    var output : Fragment;\r\n    output.Position = vec4<f32>(positions[v_id], 0.0, 1.0);\r\n    output.Color = vec4<f32>(colors[v_id], 1.0);\r\n\r\n    return output;\r\n};\r\n\r\n@fragment\r\nfn fs_main(@location(0) Color: vec4<f32>) -> @location(0) vec4<f32> {\r\n    return Color;\r\n}\r\n";
 
 class WebGPURenderPass extends RendererPass {
     #webGpuDevice;
