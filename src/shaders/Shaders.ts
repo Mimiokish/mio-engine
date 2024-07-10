@@ -1,22 +1,22 @@
-import { ShaderParams, CanvasContext } from "../declaration";
+import { ShaderParams, HTMLCanvasContext } from "../declaration";
 
 export class Shaders {
     #key: string;
     #type: number;
     #source: string;
-    #context: CanvasContext;
+    #context: HTMLCanvasContext;
 
     constructor(params: ShaderParams) {
         const _key: string = params.key;
         const _type: number = params.type;
         const _source: string = params.source;
-        const _context: CanvasContext = params.context;
+        const _context: HTMLCanvasContext = params.context;
 
         this.#initialParams(_key, _type, _source, _context);
         this.#initialShader();
     }
 
-    #initialParams(key: string, type: number, source: string, context: CanvasContext): void {
+    #initialParams(key: string, type: number, source: string, context: HTMLCanvasContext): void {
         this.#key = key;
         this.#type = type;
         this.#source = source;

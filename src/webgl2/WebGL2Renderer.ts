@@ -1,6 +1,6 @@
 import { WebGLRendererParams } from "../declaration/";
 import { WebGL2Parameters } from "./WebGL2Parameters";
-import { Canvas } from "../document-object-model";
+import { WebGPUCanvas } from "../document-object-model";
 
 export class WebGL2Renderer extends WebGL2Parameters {
     #program: WebGLProgram;
@@ -16,6 +16,6 @@ export class WebGL2Renderer extends WebGL2Parameters {
 
     #initialParams(params: WebGLRendererParams): void {
         this.type = "WebGL2";
-        this.target = new Canvas();
+        this.target = new WebGPUCanvas();
     }
 }

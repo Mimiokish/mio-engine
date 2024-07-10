@@ -1,2 +1,2 @@
-export { Canvas } from "./Canvas";
-export { DocumentObjectModel } from "./DocumentObjectModel";
+export { WebGPUCanvas } from "./WebGPUCanvas";
+export { HTML } from "./HTML";

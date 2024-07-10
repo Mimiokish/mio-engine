@@ -1,16 +1,15 @@
-import { RendererParams, WebGPUContext } from "../declaration";
-import { Canvas } from "../document-object-model";
+import { RendererParams, HTMLNode, HTMLCanvas, HTMLCanvasContext } from "../declaration";
+import { WebGPUCanvas } from "../document-object-model";
 
 export class Renderer {
-    #node: HTMLCanvasElement;
-    #canvas: Canvas;
-    #context: WebGPUContext;
+    #node: HTMLNode;
+    #canvas: HTMLCanvas;
 
-    public get context(): WebGPUContext {
-        return this.#context;
+    public get canvas(): HTMLCanvas {
+        return this.#canvas;
     }
-    public set context(value: WebGPUContext) {
-        throw Error("MiO-Engine | context is readonly");
+    public set canvas(value: HTMLCanvas) {
+        throw Error("MiO-Engine | Renderer - canvas is readonly");
     }
 
     constructor(params: RendererParams) {
@@ -28,24 +27,27 @@ export class Renderer {
     async #initialParams(params: RendererParams): Promise<boolean> {
         const _contentType: string = params.contextType ? params.contextType : "WebGPU";
 
-        this.#node = document.getElementById("MiO-Engine") as HTMLCanvasElement;
+        this.#node = document.getElementById("MiO-Engine") as HTMLNode;
         if (!this.#node) {
             console.error("MiO-Engine | Renderer - a node with the ID(MiO-Engine) needs to be create before render");
             return false;
         }
 
-        this.#canvas = new Canvas();
-        this.#node.appendChild(this.#canvas.node);
-
         switch (_contentType) {
             case "WebGPU":
             case "webgpu":
-                this.#context = this.#canvas.getContext("webgpu") as WebGPUContext;
+                this.#canvas = new WebGPUCanvas();
                 break;
             default:
-                this.#context = this.#canvas.getContext("webgpu") as WebGPUContext;
+                this.#canvas = new WebGPUCanvas();
         }
 
+        this.#node.appendChild(this.#canvas.self);
+
         return true;
+    }
+
+    public resize(width: number, height: number): void {
+        this.#canvas.resize(width, height);
     }
 }

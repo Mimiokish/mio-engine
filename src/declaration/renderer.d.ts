@@ -5,10 +5,10 @@ export type RendererParams = {
     contextType: CanvasContextType
 }
 
-export type RendererPassParams = {
+export type RenderPassParams = {
     context: WebGPUContext
     device: WebGPUDevice
 }
 
-export type RendererPasses =
+export type RenderPasses =
     | WebGPURenderPass

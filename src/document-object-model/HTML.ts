@@ -1,12 +1,12 @@
 import { HTMLTagName, HTMLNode } from "../declaration";
 
-export class DocumentObjectModel {
-    #node: HTMLNode;
+export class HTML {
+    #self: HTMLNode;
 
-    public get node(): HTMLNode {
-        return this.#node;
+    public get self(): HTMLNode {
+        return this.#self;
     }
-    public set node(value: HTMLNode) {
+    public set self(value: HTMLNode) {
         throw new Error("MiO Engine | node is readonly");
     }
 
@@ -17,26 +17,35 @@ export class DocumentObjectModel {
     #initialParams(tagName: HTMLTagName): void {
         const _tagName: HTMLTagName = tagName;
         if (!_tagName) {
-            this.#node = document.createElement("div");
+            this.#self = document.createElement("div");
         } else {
-            this.#node = document.createElement(_tagName);
+            switch (_tagName) {
+                case "canvas":
+                    this.#self = document.createElement("canvas") as HTMLCanvasElement;
+                    break;
+                case "div":
+                    this.#self = document.createElement("div");
+                    break;
+                default:
+                    this.#self = document.createElement("div");
+            }
         }
     }
 
-    async appendToBody(): Promise<boolean> {
+    public async appendToBody(): Promise<boolean> {
         try {
-            if (!this.#node) {
+            if (!this.#self) {
                 console.log("MiO Engine | node is not found");
                 return Promise.resolve(false);
             }
 
             if (document.readyState === "complete") {
-                document.body.appendChild(this.#node);
+                document.body.appendChild(this.#self);
                 return Promise.resolve(true);
             } else {
                 return new Promise<boolean>((resolve): void => {
                     const eventFn = (): void => {
-                        document.body.appendChild(this.#node);
+                        document.body.appendChild(this.#self);
                         document.removeEventListener("DOMContentLoaded", eventFn);
                         resolve(true);
                     };
@@ -50,7 +59,7 @@ export class DocumentObjectModel {
         }
     }
 
-    async appendToElement(nodeId: string): Promise<boolean> {
+    public async appendToElement(nodeId: string): Promise<boolean> {
         try {
             const _nodeId: string = nodeId;
             if (!_nodeId) {
@@ -58,7 +67,7 @@ export class DocumentObjectModel {
                 return Promise.resolve(false);
             }
 
-            if (!this.#node) {
+            if (!this.#self) {
                 console.log("MiO Engine | node is not found");
                 return Promise.resolve(false);
             }
@@ -70,18 +79,18 @@ export class DocumentObjectModel {
                     return Promise.resolve(false);
                 }
 
-                nodeParent.appendChild(this.#node);
+                nodeParent.appendChild(this.#self);
                 return Promise.resolve(true);
             } else {
                 return new Promise<boolean>((resolve): void => {
                     const eventFn = (): void => {
-                        if (this.#node) {
+                        if (this.#self) {
                             const nodeParent: HTMLElement | null = document.getElementById(_nodeId);
                             if (!nodeParent) {
                                 console.log("MiO Engine | parent node with id " + _nodeId + " is not found");
                                 resolve(false);
                             } else {
-                                nodeParent.appendChild(this.#node);
+                                nodeParent.appendChild(this.#self);
 
                                 document.removeEventListener("DOMContentLoaded", eventFn);
                                 resolve(true);

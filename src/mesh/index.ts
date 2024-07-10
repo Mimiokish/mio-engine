@@ -1,0 +1,1 @@
+export { TriangleMesh } from "./TriangleMesh";

@@ -1,7 +1,5 @@
 export type WebGPU = GPU;
 
-export type WebGPUContext = GPUCanvasContext;
-
 export type WebGPUAdapter = GPUAdapter;
 
 export type WebGPUDevice = GPUDevice;
@@ -15,3 +13,13 @@ export type WebGPUShaderModule = GPUShaderModule;
 export type WebGPUCommandEncoder = GPUCommandEncoder;
 
 export type WebGPUTextureView = GPUTextureView;
+
+export type WebGPURenderPassEncoder = GPURenderPassEncoder;
+
+export type WebGPUBuffer = GPUBuffer;
+
+export type WebGPUBufferLayout = GPUVertexBufferLayout;
+
+export type WebGPUBufferUsageFlags = GPUBufferUsageFlags;
+
+export type WebGPUBufferDescriptor = GPUBufferDescriptor;

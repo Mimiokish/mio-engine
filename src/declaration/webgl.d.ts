@@ -1,5 +1,5 @@
 import { EnumObject } from "./common";
-import { Canvas } from "../document-object-model";
+import { WebGPUCanvas } from "../document-object-model";
 
 export type WebGLContext =
     | WebGLRenderingContext
@@ -11,7 +11,7 @@ export type WebGLContextType =
     | "WebGPU"
 
 export type WebGLTarget =
-    | Canvas
+    | WebGPUCanvas
 
 export type WebGLAttributes = {
     gl: WebGLContext;
