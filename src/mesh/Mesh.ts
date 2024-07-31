@@ -47,13 +47,18 @@ export class Mesh {
     }
 
     #initialParams(params: WebGPUMeshParameters): void {
-        this.#webGpuDevice = params.device;
+        const _params: WebGPUMeshParameters = params;
+
+        if (_params.device) {
+            this.#webGpuDevice = _params.device;
+        }
+
         this.#webGpuBufferUsage = GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST;
     }
 
-    protected createBuffer(): void {
+    public createBuffer(): void {
         if (!this.#webGpuDevice) {
-            console.warn("MiO-Engine | Mesh - createBuffer - webGpuDevice is missing");
+            console.warn("MiO-Engine | Mesh - webGpuDevice is missing while creating a buffer");
             return;
         } else {
             this.#webGpuBufferDescriptor = {

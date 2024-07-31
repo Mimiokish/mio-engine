@@ -1,3 +1,4 @@
+import plugin_resolve from "@rollup/plugin-node-resolve";
 import plugin_babel from "@rollup/plugin-babel";
 import plugin_typescript from "@rollup/plugin-typescript";
 import plugin_eslint from "@rollup/plugin-eslint";
@@ -10,9 +11,13 @@ export default {
         name: "MiO-Engine",
         file: "static/mio-engine.js",
         format: "es",
-        sourcemap: true
+        sourcemap: true,
+        external: [
+            "gl-matrix"
+        ]
     },
     plugins: [
+        plugin_resolve(),
         plugin_typescript({
             tsconfig: "tsconfig.json"
         }),

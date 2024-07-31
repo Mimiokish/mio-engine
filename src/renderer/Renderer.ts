@@ -12,6 +12,13 @@ export class Renderer {
         throw Error("MiO-Engine | Renderer - canvas is readonly");
     }
 
+    public get context(): GPUCanvasContext {
+        return this.#canvas.context;
+    }
+    public set context(value: string) {
+        throw Error("MiO-Engine | Renderer - context is readonly");
+    }
+
     constructor(params: RendererParams) {
         const _params: RendererParams = params;
 

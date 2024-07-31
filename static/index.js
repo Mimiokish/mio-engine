@@ -1,8 +1,17 @@
 import * as MiOEngine from "./mio-engine.js";
 // console.log(111, MiOEngine);
 
-const webGpuRenderer = new MiOEngine.WebGPURenderer();
-console.log(222, webGpuRenderer);
+const renderer = new MiOEngine.WebGPURenderer();
+renderer.initialize().then((res) => {
+    if (res) {
+        // webGpuRenderer.createAssets();
+        renderer.createAssets().then(() => {
+            renderer.createPipeline();
+
+            renderer.render();
+        });
+    }
+});
 
 // const gltfLoader = new MiOEngine.GLTFLoader();
 // // console.log(333, gltfLoader);

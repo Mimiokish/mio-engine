@@ -8,3 +8,5 @@ export { WebGLContext, WebGLTarget, WebGLContextType, WebGLAttributes, WebGLRend
 export { WebGPU, WebGPUAdapter, WebGPUDevice, WebGPUFormat, WebGPURenderPipeline, WebGPUShaderModule, WebGPUCommandEncoder, WebGPUTextureView, WebGPURenderPassEncoder, WebGPUBuffer, WebGPUBufferLayout, WebGPUBufferUsageFlags, WebGPUBufferDescriptor } from "./webgpu";
 export { WebGPURenderPassParameters, WebGPURenderPipelineParameters, WebGPUMeshParameters } from "./webgpu.params";
 export { ShaderParams } from "./shader";
+export { Texture, TextureView, TextureDescriptor, Sampler } from "./objects";
+export { MaterialParameters } from "./objects.params";
